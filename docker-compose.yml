@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: base
+    container_name: payout-server
+    volumes:
+      - ./server/:/usr/src/app
+    ports:
+      - "5001:5001"
+    depends_on:
+      - mongodb
+    env_file: ./server/.env
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app-network
+    command: npm run start:dev
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: base
+    container_name: payout-client
+    volumes:
+      - ./client/:/usr/src/app
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    command: npm start
+  mongodb:
+    image: mongo
+    volumes:
+      - mongo-data-volume:/data/db
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+volumes:
+    mongo-data-volume:
+
+networks:
+    app-network:
+        driver: bridge
